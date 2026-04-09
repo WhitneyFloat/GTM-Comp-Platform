@@ -1,0 +1,282 @@
+[
+  {
+    "id": 1,
+    "name": "Render",
+    "stage": "Series C Extension",
+    "headcount": "~166",
+    "url": "linkedin.com/company/renderco",
+    "fit": 80
+  },
+  {
+    "id": 2,
+    "name": "Eight Sleep",
+    "stage": "Series D+",
+    "headcount": "~300",
+    "url": "linkedin.com/company/eight--",
+    "fit": 85
+  },
+  {
+    "id": 3,
+    "name": "Frore Systems",
+    "stage": "Series D",
+    "headcount": "~200",
+    "url": "linkedin.com/company/froresystems",
+    "fit": 90
+  },
+  {
+    "id": 4,
+    "name": "Sunday",
+    "stage": "Series B",
+    "headcount": "~70",
+    "url": "linkedin.com/company/sunday-robotics",
+    "fit": 98
+  },
+  {
+    "id": 5,
+    "name": "AMI - Advanced Machine Intelligence",
+    "stage": "Seed",
+    "headcount": "~100",
+    "url": "linkedin.com/company/ami-labs",
+    "fit": 95
+  },
+  {
+    "id": 6,
+    "name": "OKX",
+    "stage": "Public / Late Stage",
+    "headcount": "~3,000+",
+    "url": "linkedin.com/company/okx",
+    "fit": 86
+  },
+  {
+    "id": 7,
+    "name": "WorkOS",
+    "stage": "Series B",
+    "headcount": "~100",
+    "url": "linkedin.com/company/workos-inc",
+    "fit": 88
+  },
+  {
+    "id": 8,
+    "name": "Whop",
+    "stage": "Series B",
+    "headcount": "~350",
+    "url": "linkedin.com/company/whop",
+    "fit": 88
+  },
+  {
+    "id": 9,
+    "name": "Basis",
+    "stage": "Series B",
+    "headcount": "~50",
+    "url": "linkedin.com/company/basis-ai",
+    "fit": 80
+  },
+  {
+    "id": 10,
+    "name": "MatX",
+    "stage": "Series B",
+    "headcount": "~100",
+    "url": "linkedin.com/company/matxai",
+    "fit": 94
+  },
+  {
+    "id": 11,
+    "name": "Wonderful",
+    "stage": "Series B",
+    "headcount": "~300",
+    "url": "linkedin.com/company/wonderful-ai",
+    "fit": 85
+  },
+  {
+    "id": 12,
+    "name": "Rhoda AI",
+    "stage": "Series A",
+    "headcount": "~80",
+    "url": "linkedin.com/company/rhoda-ai",
+    "fit": 82
+  },
+  {
+    "id": 13,
+    "name": "Nexthop AI",
+    "stage": "Series B",
+    "headcount": "~100",
+    "url": "linkedin.com/company/nexthop-ai",
+    "fit": 94
+  },
+  {
+    "id": 14,
+    "name": "Solace",
+    "stage": "Series C",
+    "headcount": "~200",
+    "url": "linkedin.com/company/solacehealth",
+    "fit": 90
+  },
+  {
+    "id": 15,
+    "name": "Fundamental",
+    "stage": "Series A",
+    "headcount": "~50",
+    "url": "linkedin.com/company/fundamental-ai",
+    "fit": 92
+  },
+  {
+    "id": 16,
+    "name": "Bedrock Robotics",
+    "stage": "Series B",
+    "headcount": "~150",
+    "url": "linkedin.com/company/bedrock-robotics",
+    "fit": 97
+  },
+  {
+    "id": 17,
+    "name": "Midi Health",
+    "stage": "Series D",
+    "headcount": "~600",
+    "url": "linkedin.com/company/midi-health",
+    "fit": 80
+  },
+  {
+    "id": 18,
+    "name": "PaleBlueDot AI",
+    "stage": "Series B",
+    "headcount": "~100",
+    "url": "linkedin.com/company/palebluedotai",
+    "fit": 87
+  },
+  {
+    "id": 19,
+    "name": "Upwind Security",
+    "stage": "Series B",
+    "headcount": "~300",
+    "url": "linkedin.com/company/upwindsecurity",
+    "fit": 95
+  },
+  {
+    "id": 20,
+    "name": "Ricursive Intelligence",
+    "stage": "Series A",
+    "headcount": "~50",
+    "url": "linkedin.com/company/ricursive-intelligence",
+    "fit": 98
+  },
+  {
+    "id": 21,
+    "name": "humans&",
+    "stage": "Seed",
+    "headcount": "~100",
+    "url": "linkedin.com/company/humans-and",
+    "fit": 88
+  },
+  {
+    "id": 22,
+    "name": "Alpaca",
+    "stage": "Series C",
+    "headcount": "~200",
+    "url": "linkedin.com/company/alpacadb",
+    "fit": 81
+  },
+  {
+    "id": 23,
+    "name": "Higgsfield AI",
+    "stage": "Series A",
+    "headcount": "~232",
+    "url": "linkedin.com/company/higgsfield-ai",
+    "fit": 92
+  },
+  {
+    "id": 24,
+    "name": "Deepgram",
+    "stage": "Series C",
+    "headcount": "~250",
+    "url": "linkedin.com/company/deepgram",
+    "fit": 85
+  },
+  {
+    "id": 25,
+    "name": "Etched",
+    "stage": "Series C",
+    "headcount": "~100",
+    "url": "linkedin.com/company/etchedai",
+    "fit": 81
+  },
+  {
+    "id": 26,
+    "name": "Torq",
+    "stage": "Series D",
+    "headcount": "~382",
+    "url": "linkedin.com/company/torqio",
+    "fit": 80
+  },
+  {
+    "id": 27,
+    "name": "Vanta",
+    "stage": "Series D",
+    "headcount": "~1,695",
+    "url": "linkedin.com/company/vanta-security",
+    "fit": 95
+  },
+  {
+    "id": 28,
+    "name": "Drata",
+    "stage": "Series C",
+    "headcount": "~730",
+    "url": "linkedin.com/company/drata",
+    "fit": 82
+  },
+  {
+    "id": 29,
+    "name": "Hex",
+    "stage": "Series B",
+    "headcount": "~250",
+    "url": "linkedin.com/company/hex-technologies",
+    "fit": 86
+  },
+  {
+    "id": 30,
+    "name": "Writer",
+    "stage": "Series C",
+    "headcount": "~350",
+    "url": "linkedin.com/company/writer-ai",
+    "fit": 92
+  },
+  {
+    "id": 31,
+    "name": "Runway Financial",
+    "stage": "Series C",
+    "headcount": "~200",
+    "url": "linkedin.com/company/runway-financial",
+    "fit": 83
+  },
+  {
+    "id": 32,
+    "name": "Retool",
+    "stage": "Series C",
+    "headcount": "~500",
+    "url": "linkedin.com/company/retool-inc",
+    "fit": 98
+  },
+  {
+    "id": 33,
+    "name": "Merge API",
+    "stage": "Series B",
+    "headcount": "~150",
+    "url": "linkedin.com/company/merge-api",
+    "fit": 89
+  },
+  {
+    "id": 34,
+    "name": "Ashby",
+    "stage": "Series C",
+    "headcount": "~200",
+    "url": "linkedin.com/company/ashby-recruiting",
+    "fit": 81
+  },
+  {
+    "id": 35,
+    "name": "Coda",
+    "stage": "Series D",
+    "headcount": "~350",
+    "url": "linkedin.com/company/coda-hq",
+    "fit": 97
+  }
+]
