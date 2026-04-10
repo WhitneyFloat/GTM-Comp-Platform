@@ -1,22 +1,24 @@
+"use client";
+
 import { Space_Grotesk } from "next/font/google";
 import Sidebar from "@/components/Sidebar";
 import "./globals.css";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
 });
 
-export const metadata = {
-  title: "GTM Comp Platform",
-  description: "Building the comp infrastructure that turns a sales team into a revenue engine.",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const isPublicRoute = pathname === "/diagnostic";
+
   return (
     <html lang="en" className={`${spaceGrotesk.variable} h-full antialiased`}>
       <body className="min-h-full flex text-text-main font-sans overflow-hidden relative">
@@ -28,8 +30,11 @@ export default function RootLayout({
           }}
         />
         
-        <Sidebar />
-        <main className="flex-1 overflow-auto h-screen relative z-10 p-4">
+        {!isPublicRoute && <Sidebar />}
+        <main className={cn(
+          "flex-1 overflow-auto h-screen relative z-10",
+          !isPublicRoute ? "p-4" : "p-0"
+        )}>
           {children}
         </main>
       </body>
