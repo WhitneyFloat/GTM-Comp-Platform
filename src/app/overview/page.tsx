@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   BarChart3, 
@@ -18,8 +19,21 @@ import { LiquidGlassCard } from "@/components/ui/LiquidGlassCard";
 import leadsData from "@/data/leads.json";
 
 export default function OverviewPage() {
-  const totalLeads = leadsData.length;
-  const highFitLeads = leadsData.filter(l => l.fit > 90).length;
+  const [leads, setLeads] = useState<any[]>([]);
+  
+  useEffect(() => {
+    fetch("/api/leads")
+      .then(res => res.json())
+      .then(data => {
+        setLeads(data.length > 0 ? data : leadsData.map((l: any) => ({ ...l, status: l.status || "active" })));
+      })
+      .catch(() => {
+        setLeads(leadsData.map((l: any) => ({ ...l, status: l.status || "active" })));
+      });
+  }, []);
+
+  const totalLeads = leads.length;
+  const highFitLeads = leads.filter(l => l.fit > 90).length;
   
   const stats = [
     { label: "Active Pipeline", value: totalLeads, icon: Users, trend: "+12%", color: "text-indigo-600" },
@@ -28,7 +42,7 @@ export default function OverviewPage() {
     { label: "Avg. Health Score", value: "64", icon: Activity, trend: "-5pts", color: "text-rose-600" },
   ];
 
-  const recentLeads = leadsData.slice(0, 5);
+  const recentLeads = leads.slice(0, 5);
 
   return (
     <div className="w-full h-full flex flex-col pt-12 px-8 overflow-y-auto pb-24">
