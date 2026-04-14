@@ -14,9 +14,9 @@ interface LiquidGlassCardProps {
   expandedWidth?: string;
   expandedHeight?: string;
   blurIntensity?: 'sm' | 'md' | 'lg' | 'xl';
-  shadowIntensity?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  shadowIntensity?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   borderRadius?: string;
-  glowIntensity?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  glowIntensity?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
 export const LiquidGlassCard = ({
