@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { LiquidGlassCard } from "@/components/ui/LiquidGlassCard";
 import { cn } from "@/lib/utils";
+import jsPDF from "jspdf";
 
 type Question = {
   id: string;
@@ -188,13 +189,51 @@ export default function PublicDiagnostic() {
     }, 400);
   };
 
-  const handleLeadSubmit = (e: React.FormEvent) => {
+  const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
+    
+    const percentage = calculateHealthPercentage();
+    
+    try {
+      // Save to Google Sheet
+      await fetch("/api/leads", {
+        method: "POST",
+        body: JSON.stringify({
+          name: leadInfo.name,
+          email: leadInfo.email,
+          score: percentage,
+        }),
+      });
+      
       setIsSubmitting(false);
       setCurrentStep(prev => prev + 1);
-    }, 1500);
+    } catch (err) {
+      console.error("Submission failed", err);
+      setIsSubmitting(false);
+      setCurrentStep(prev => prev + 1); // Proceed anyway for UX
+    }
+  };
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    const score = calculateHealthPercentage();
+    
+    doc.setFontSize(22);
+    doc.text("GTM Comp Plan Diagnostic Report", 20, 20);
+    
+    doc.setFontSize(16);
+    doc.text(`Score: ${score}%`, 20, 40);
+    
+    doc.setFontSize(12);
+    doc.text(`Lead Name: ${leadInfo.name}`, 20, 60);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 70);
+    
+    doc.text("Analysis Summary:", 20, 90);
+    doc.text("Your input suggests significant alignment gaps between your current GTM", 20, 100);
+    doc.text("strategy and rep incentives. This report outlines your prioritized risks.", 20, 110);
+    
+    doc.save(`GTM-Comp-Report-${leadInfo.name}.pdf`);
   };
 
   const calculateHealthPercentage = () => {
@@ -381,7 +420,10 @@ export default function PublicDiagnostic() {
                    ))}
                 </div>
 
-                <button className="w-full bg-slate-800 text-white py-5 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-900 transition-all shadow-2xl shadow-slate-300 text-sm">
+                <button 
+                  onClick={handleDownloadPDF}
+                  className="w-full bg-slate-800 text-white py-5 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-900 transition-all shadow-2xl shadow-slate-300 text-sm"
+                >
                   <Download size={20} /> Download Full Strategy Report
                 </button>
                 <div className="mt-8 pt-8 border-t border-slate-100 flex flex-col items-center gap-4">
