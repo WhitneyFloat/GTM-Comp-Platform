@@ -28,6 +28,35 @@ export const SequencePanel = ({ lead, isOpen, onClose }: SequencePanelProps) => 
   const [activeTab, setActiveTab] = useState<"email" | "linkedin">("email");
   const [step, setStep] = useState(1);
 
+  const [isSending, setIsSending] = useState(false);
+  const [isSent, setIsSent] = useState(false);
+
+  const handleSendEmail = async () => {
+    setIsSending(true);
+    const emailData = generateEmail(step);
+    
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: lead.email || "recipient@example.com",
+          subject: emailData.subject,
+          body: emailData.body
+        }),
+      });
+
+      if (response.ok) {
+        setIsSent(true);
+        setTimeout(() => setIsSent(false), 3000);
+      }
+    } catch (error) {
+      console.error("Failed to send email", error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   if (!lead) return null;
 
   const handleCopy = (text: string, id: string) => {
@@ -119,7 +148,7 @@ export const SequencePanel = ({ lead, isOpen, onClose }: SequencePanelProps) => 
                     activeTab === "email" ? "bg-indigo-600 text-white shadow-md" : "text-slate-500 hover:bg-white/40"
                   )}
                 >
-                  <Mail size={14} /> Email Drafts
+                  <Mail size={14} /> Send Email
                 </button>
                 <button 
                   onClick={() => setActiveTab("linkedin")}
@@ -210,9 +239,53 @@ export const SequencePanel = ({ lead, isOpen, onClose }: SequencePanelProps) => 
 
               {/* Actions */}
               <div className="p-6 border-t border-white/20 bg-white/20 flex gap-3">
-                <button className="flex-1 py-3.5 bg-slate-800 text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-900 transition-all">
-                   Save to n8n Queue <Send size={16} />
-                </button>
+                {activeTab === "email" ? (
+                  <button 
+                    onClick={handleSendEmail}
+                    disabled={isSending || isSent}
+                    className={cn(
+                      "flex-1 py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all relative overflow-hidden",
+                      isSent 
+                        ? "bg-emerald-500 text-white" 
+                        : "bg-slate-800 text-white hover:bg-slate-900 disabled:bg-slate-700"
+                    )}
+                  >
+                    <AnimatePresence mode="wait">
+                      {isSending ? (
+                        <motion.div
+                          key="sending"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="flex items-center gap-2"
+                        >
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Sending...
+                        </motion.div>
+                      ) : isSent ? (
+                        <motion.div
+                          key="sent"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="flex items-center gap-2"
+                        >
+                          Sent! <Check size={18} className="text-white" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="default"
+                          className="flex items-center gap-2"
+                        >
+                          Send with Gmail <Send size={16} />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </button>
+                ) : (
+                  <button className="flex-1 py-3.5 bg-slate-800 text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-900 transition-all">
+                     Save to n8n Queue <Send size={16} />
+                  </button>
+                )}
               </div>
             </LiquidGlassCard>
           </motion.div>
