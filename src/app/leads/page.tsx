@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Users, 
@@ -19,12 +19,29 @@ import { LiquidGlassCard } from "@/components/ui/LiquidGlassCard";
 import { SequencePanel } from "@/components/SequencePanel";
 import { cn } from "@/lib/utils";
 import leadsData from "@/data/leads.json";
+import { getFitReason } from "@/lib/scoring";
 
 export default function LeadsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [leads, setLeads] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/leads")
+      .then(res => res.json())
+      .then(data => {
+        setLeads(data.length > 0 ? data : leadsData.map((l: any) => ({ ...l, status: l.status || "active" })));
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setLeads(leadsData.map((l: any) => ({ ...l, status: l.status || "active" })));
+        setIsLoading(false);
+      });
+  }, []);
   
-  const filteredLeads = leadsData.filter(lead => 
+  const filteredLeads = leads.filter(lead => 
+    lead.status !== "archived" &&
     lead.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -115,6 +132,13 @@ export default function LeadsPage() {
                         <span>•</span>
                         <span>{lead.headcount} Reps</span>
                       </div>
+                      <div className="flex flex-wrap gap-1 mt-3">
+                        {getFitReason({ ...lead, salesRepCount: lead.salesRepCount }).map((reason, i) => (
+                           <span key={i} className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[8px] font-bold uppercase tracking-tighter border border-emerald-100/50">
+                             {reason}
+                           </span>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="pt-2 flex flex-col gap-2">
@@ -153,7 +177,7 @@ export default function LeadsPage() {
             <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
               <div className="flex items-center gap-2">
                 <span className="text-slate-600">Total Leads:</span>
-                <span className="text-brand-indigo">{leadsData.length}</span>
+                <span className="text-brand-indigo">{leads.length}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-slate-600">Filtered:</span>
