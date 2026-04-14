@@ -13,9 +13,10 @@ import {
   Clock,
   MessageSquare
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LiquidGlassCard } from "./ui/LiquidGlassCard";
 import { cn } from "@/lib/utils";
+import { Trash2 } from "lucide-react"; // Added Trash icon
 
 interface SequencePanelProps {
   lead: any;
@@ -27,49 +28,17 @@ export const SequencePanel = ({ lead, isOpen, onClose }: SequencePanelProps) => 
   const [copied, setCopied] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"email" | "linkedin">("email");
   const [step, setStep] = useState(1);
-
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(false);
 
-  const handleSendEmail = async () => {
-    setIsSending(true);
-    const emailData = generateEmail(step);
-    
-    try {
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: lead.email || "recipient@example.com",
-          subject: emailData.subject,
-          body: emailData.body
-        }),
-      });
-
-      if (response.ok) {
-        setIsSent(true);
-        setTimeout(() => setIsSent(false), 3000);
-      }
-    } catch (error) {
-      console.error("Failed to send email", error);
-    } finally {
-      setIsSending(false);
-    }
-  };
-
-  if (!lead) return null;
-
-  const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
+  // New states for editing
+  const [editableSubject, setEditableSubject] = useState("");
+  const [editableBody, setEditableBody] = useState("");
 
   // Simple template generator
   const generateEmail = (step: number) => {
     const company = lead.name || "your company";
     const firstName = lead.contactName || "Team";
-    const headCount = lead.headcount || "scaling";
     
     const templates = {
       1: {
@@ -84,6 +53,54 @@ export const SequencePanel = ({ lead, isOpen, onClose }: SequencePanelProps) => 
     
     return templates[step as keyof typeof templates] || templates[1];
   };
+
+  // Update editable content when step or lead changes
+  useEffect(() => {
+    if (lead) {
+      const template = generateEmail(step);
+      setEditableSubject(template.subject);
+      setEditableBody(template.body);
+    }
+  }, [step, lead]);
+
+  const handleSendEmail = async () => {
+    setIsSending(true);
+    
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: lead.email || "recipient@example.com",
+          subject: editableSubject, // Use edited subject
+          body: editableBody         // Use edited body
+        }),
+      });
+
+      if (response.ok) {
+        setIsSent(true);
+        setTimeout(() => setIsSent(false), 3000);
+      }
+    } catch (error) {
+      console.error("Failed to send email", error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleCopy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  const handleDiscard = () => {
+    const template = generateEmail(step);
+    setEditableSubject(template.subject);
+    setEditableBody(template.body);
+  };
+
+  if (!lead) return null;
 
   const generateLinkedin = (step: number) => {
     const company = lead.name || "your company";
@@ -187,20 +204,37 @@ export const SequencePanel = ({ lead, isOpen, onClose }: SequencePanelProps) => 
                 {activeTab === "email" ? (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Subject Line</label>
-                      <div className="p-3 bg-white/60 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 flex justify-between items-center group">
-                        <span>{generateEmail(step).subject}</span>
-                        <button onClick={() => handleCopy(generateEmail(step).subject, 'subj')} className="text-slate-300 hover:text-brand-indigo">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Subject Line</label>
+                        <button 
+                          onClick={handleDiscard}
+                          className="text-[10px] font-bold text-rose-400 uppercase tracking-widest flex items-center gap-1 hover:text-rose-500 transition-colors"
+                        >
+                          <Trash2 size={10} /> Discard Edits
+                        </button>
+                      </div>
+                      <div className="p-3 bg-white/60 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 flex justify-between items-center group focus-within:border-indigo-400 transition-colors">
+                        <input 
+                          type="text"
+                          value={editableSubject}
+                          onChange={(e) => setEditableSubject(e.target.value)}
+                          className="bg-transparent border-none outline-none w-full mr-4"
+                        />
+                        <button onClick={() => handleCopy(editableSubject, 'subj')} className="text-slate-300 hover:text-brand-indigo shrink-0">
                           {copied === 'subj' ? <Check size={14} /> : <Copy size={14} />}
                         </button>
                       </div>
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Message Body</label>
-                      <div className="p-4 bg-white/80 border border-slate-200 rounded-xl text-sm leading-relaxed text-slate-600 min-h-[300px] whitespace-pre-wrap relative group">
-                        {generateEmail(step).body}
+                      <div className="p-4 bg-white/80 border border-slate-200 rounded-xl text-sm leading-relaxed text-slate-600 min-h-[350px] relative group focus-within:border-indigo-400 transition-colors">
+                        <textarea 
+                          value={editableBody}
+                          onChange={(e) => setEditableBody(e.target.value)}
+                          className="bg-transparent border-none outline-none w-full h-full min-h-[300px] resize-none scrollbar-hide"
+                        />
                         <button 
-                          onClick={() => handleCopy(generateEmail(step).body, 'body')}
+                          onClick={() => handleCopy(editableBody, 'body')}
                           className="absolute bottom-4 right-4 p-2 bg-indigo-50 text-brand-indigo rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           {copied === 'body' ? <Check size={16} /> : <Copy size={16} />}
