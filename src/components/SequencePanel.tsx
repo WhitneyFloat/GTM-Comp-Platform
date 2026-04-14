@@ -257,18 +257,6 @@ export const SequencePanel = ({ lead, isOpen, onClose }: SequencePanelProps) => 
                   </div>
                 )}
 
-                <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl flex gap-3">
-                  <div className="p-1.5 bg-amber-100 rounded text-amber-600 h-fit">
-                    <Clock size={16} />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wide">Sequence Timing</h4>
-                    <p className="text-[11px] text-amber-900/60 mt-0.5 leading-normal">
-                      This sequence is set for a 6-week duration with 5 touchpoints total. 
-                      Optimal send time: Tuesday @ 8:45 AM.
-                    </p>
-                  </div>
-                </div>
               </div>
 
               {/* Actions */}
