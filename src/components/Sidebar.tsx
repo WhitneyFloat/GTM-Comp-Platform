@@ -30,7 +30,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-68 h-screen p-4 flex flex-col z-50">
+    <aside className="hidden lg:flex w-68 h-screen p-4 flex-col z-50">
       <LiquidGlassCard 
         className="w-full h-full flex flex-col"
         blurIntensity="xl" 
