@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, CheckCircle2, Activity } from "lucide-react";
 import { LiquidGlassCard } from "@/components/ui/LiquidGlassCard";
 import { cn } from "@/lib/utils";
+import jsPDF from "jspdf";
 
 type Question = {
   id: string;
@@ -188,6 +189,76 @@ export default function DiagnosticEngine() {
   const maxScore = QUESTIONS.length * 5;
   const healthPercentage = Math.max(0, 100 - Math.round((totalScore / maxScore) * 100));
 
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("GTM Comp Plan Diagnostic Report", 20, 24);
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Generated: ${date}`, 20, 33);
+    doc.text(`Gill GTM Compensation Consultancy  |  kelly@gillgtmpartners.com`, 20, 40);
+
+    doc.setDrawColor(99, 102, 241);
+    doc.line(20, 45, 190, 45);
+
+    doc.setFontSize(28);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(99, 102, 241);
+    doc.text(`${healthPercentage}%`, 20, 65);
+    doc.setFontSize(12);
+    doc.setTextColor(30, 27, 75);
+    doc.text("Compensation Health Score", 20, 74);
+
+    const riskLabel = healthPercentage >= 70 ? "Low Risk" : healthPercentage >= 40 ? "Moderate Risk" : "High Risk";
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Risk Level: ${riskLabel}`, 20, 83);
+
+    doc.line(20, 88, 190, 88);
+
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text("Key Findings", 20, 98);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("• High retention risk identified in OTE framework", 22, 108);
+    doc.text("• GTM alignment gap detected (+6 month lag)", 22, 116);
+    doc.text("• Operational fragility in commission calculation", 22, 124);
+
+    doc.line(20, 130, 190, 130);
+
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text("Assessment Responses", 20, 142);
+
+    let y = 152;
+    QUESTIONS.forEach((q, i) => {
+      const answer = answers[q.id];
+      if (!answer) return;
+      const option = q.options[answer.idx];
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      const qLines = doc.splitTextToSize(`Q${i + 1}: ${q.text}`, 170);
+      doc.text(qLines, 20, y);
+      y += qLines.length * 5 + 2;
+
+      doc.setFont("helvetica", "normal");
+      const aLines = doc.splitTextToSize(`→ ${option.label}`, 165);
+      doc.text(aLines, 24, y);
+      y += aLines.length * 5 + 7;
+
+      if (y > 270) { doc.addPage(); y = 20; }
+    });
+
+    doc.save("GTM-Comp-Diagnostic-Report.pdf");
+  };
+
   return (
     <div className="w-full h-full flex flex-col pt-12 px-8 overflow-y-auto pb-24">
       <div className="max-w-4xl mx-auto w-full">
@@ -347,7 +418,10 @@ export default function DiagnosticEngine() {
                         </div>
                       </div>
 
-                      <button className="bg-indigo-900 text-white font-semibold py-3 px-8 rounded-xl flex items-center gap-2 hover:bg-indigo-800 transition-colors shadow-md">
+                      <button
+                        onClick={handleDownloadPDF}
+                        className="bg-indigo-900 text-white font-semibold py-3 px-8 rounded-xl flex items-center gap-2 hover:bg-indigo-800 transition-colors shadow-md"
+                      >
                         Download Full Report PDF
                       </button>
                       <button 
