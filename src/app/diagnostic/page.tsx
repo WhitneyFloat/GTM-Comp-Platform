@@ -204,6 +204,7 @@ export default function PublicDiagnostic() {
           name: leadInfo.name,
           email: leadInfo.email,
           score: percentage,
+          stage: "1",
         }),
       });
       
