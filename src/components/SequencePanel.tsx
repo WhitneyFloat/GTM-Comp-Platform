@@ -64,6 +64,22 @@ export const SequencePanel = ({ lead, isOpen, onClose }: SequencePanelProps) => 
     }
   }, [step, lead]);
 
+  // Lock background scroll when panel is open
+  useEffect(() => {
+    const mainEl = document.querySelector("main");
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      if (mainEl) mainEl.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      if (mainEl) mainEl.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      if (mainEl) mainEl.style.overflow = "";
+    };
+  }, [isOpen]);
+
   const handleSendEmail = async () => {
     setIsSending(true);
     
@@ -126,7 +142,7 @@ export const SequencePanel = ({ lead, isOpen, onClose }: SequencePanelProps) => 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-indigo-900/10 backdrop-blur-sm z-[60]"
+            className="fixed inset-0 bg-indigo-900/10 backdrop-blur-sm z-[150]"
           />
 
           {/* Panel */}
@@ -135,7 +151,7 @@ export const SequencePanel = ({ lead, isOpen, onClose }: SequencePanelProps) => 
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-full w-full max-w-xl z-[70] p-4"
+            className="fixed right-0 top-0 h-full w-full max-w-xl z-[200] p-4"
           >
             <LiquidGlassCard className="h-full flex flex-col shadow-2xl border-l border-white/30" blurIntensity="xl">
               {/* Header */}

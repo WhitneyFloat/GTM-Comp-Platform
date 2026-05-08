@@ -3,12 +3,12 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
-import { 
-  LayoutDashboard, 
-  Activity, 
-  Users, 
-  Megaphone, 
-  Archive 
+import {
+  LayoutDashboard,
+  Activity,
+  Users,
+  Mail,
+  Archive
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LiquidGlassCard } from "./ui/LiquidGlassCard";
@@ -17,7 +17,7 @@ const MOBILE_NAV = [
   { name: "Dash", href: "/overview", icon: LayoutDashboard },
   { name: "Audit", href: "/", icon: Activity },
   { name: "Leads", href: "/leads", icon: Users },
-  { name: "Campaigns", href: "/campaigns", icon: Megaphone },
+  { name: "Outreach", href: "/outreach", icon: Mail },
   { name: "Vault", href: "/archives", icon: Archive },
 ];
 
@@ -31,7 +31,7 @@ export default function NavigationWrapper({ children }: { children: React.ReactN
       
       <main className={cn(
         "flex-1 overflow-auto h-screen relative z-10 w-full",
-        !isPublicRoute ? "p-0 lg:p-4 pb-24 lg:pb-4" : "p-0"
+        !isPublicRoute ? "p-0 lg:p-4 pb-32 lg:pb-4" : "p-0"
       )}>
         {children}
       </main>

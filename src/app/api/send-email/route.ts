@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     });
 
     const mailOptions = {
-      from: `"Kelly Gill-Braxton" <${GMAIL_USER}>`,
+      from: `"Kelly Gill-Braxton | Gill GTM Partners" <${GMAIL_USER}>`,
       to,
       subject,
       text: body,
