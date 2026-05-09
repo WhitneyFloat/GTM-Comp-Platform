@@ -176,6 +176,7 @@ export default function PublicDiagnostic() {
   const [answers, setAnswers] = useState<Record<string, { score: number; idx: number }>>({});
   const [leadInfo, setLeadInfo] = useState({ name: "", email: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const totalSteps = QUESTIONS.length;
   const isIntro = currentStep === -1;
@@ -192,28 +193,31 @@ export default function PublicDiagnostic() {
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    const percentage = calculateHealthPercentage();
-    
+    setSubmitError("");
+
     try {
-      // Save to Google Sheet
-      await fetch("/api/leads", {
+      const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: leadInfo.name,
           email: leadInfo.email,
-          score: percentage,
           stage: "1",
         }),
       });
-      
-      setIsSubmitting(false);
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setSubmitError(data.error || `Server error (${res.status}). Please try again.`);
+        setIsSubmitting(false);
+        return;
+      }
+
       setCurrentStep(prev => prev + 1);
     } catch (err) {
-      console.error("Submission failed", err);
+      setSubmitError("Network error — please check your connection and try again.");
+    } finally {
       setIsSubmitting(false);
-      setCurrentStep(prev => prev + 1); // Proceed anyway for UX
     }
   };
 
@@ -537,12 +541,17 @@ export default function PublicDiagnostic() {
                       onChange={(e) => setLeadInfo({...leadInfo, email: e.target.value})}
                     />
                   </div>
-                  <button 
+                  {submitError && (
+                    <p className="text-xs text-red-500 font-semibold bg-red-50 border border-red-100 rounded-lg px-4 py-3">
+                      {submitError}
+                    </p>
+                  )}
+                  <button
                     type="submit"
                     disabled={isSubmitting}
                     className="w-full py-5 mt-4 bg-indigo-600 text-white rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-indigo-700 shadow-2xl shadow-indigo-500/40 active:scale-[0.98] transition-all text-sm"
                   >
-                    {isSubmitting ? "Generating Report..." : (
+                    {isSubmitting ? "Saving..." : (
                       <>Receive Results <Sparkles size={20} /></>
                     )}
                   </button>
