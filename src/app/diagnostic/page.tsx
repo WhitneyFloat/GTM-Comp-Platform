@@ -577,12 +577,23 @@ export default function PublicDiagnostic() {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-                   {["Alignment", "Operational", "Motivation", "Economic"].map((dim) => (
-                     <div key={dim} className="p-4 bg-white/30 rounded-xl border border-white/40">
-                        <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{dim}</span>
-                        <span className="text-lg font-black text-slate-800">{Math.floor(Math.random() * 30) + 60}%</span>
-                     </div>
-                   ))}
+                   {[
+                     { label: "Alignment",   ids: ["q4","q7"] },
+                     { label: "Motivation",  ids: ["q5","q6","q11"] },
+                     { label: "Operational", ids: ["q8","q9","q10"] },
+                     { label: "Economic",    ids: ["q1","q2","q3","q12"] },
+                   ].map(({ label, ids }) => {
+                     const valid = ids.filter(id => answers[id]);
+                     const dimScore = valid.length
+                       ? Math.max(0, 100 - Math.round(valid.reduce((s, id) => s + answers[id].score, 0) / (valid.length * 5) * 100))
+                       : 50;
+                     return (
+                       <div key={label} className="p-4 bg-white/30 rounded-xl border border-white/40">
+                         <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</span>
+                         <span className={`text-lg font-black ${dimScore >= 70 ? "text-emerald-600" : dimScore >= 40 ? "text-amber-500" : "text-red-500"}`}>{dimScore}%</span>
+                       </div>
+                     );
+                   })}
                 </div>
 
                 <button 
