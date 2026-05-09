@@ -218,24 +218,187 @@ export default function PublicDiagnostic() {
   };
 
   const handleDownloadPDF = () => {
-    const doc = new jsPDF();
+    const doc = new jsPDF({ unit: "mm", format: "a4" });
     const score = calculateHealthPercentage();
-    
-    doc.setFontSize(22);
-    doc.text("GTM Comp Plan Diagnostic Report", 20, 20);
-    
-    doc.setFontSize(16);
-    doc.text(`Score: ${score}%`, 20, 40);
-    
-    doc.setFontSize(12);
-    doc.text(`Lead Name: ${leadInfo.name}`, 20, 60);
-    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 70);
-    
-    doc.text("Analysis Summary:", 20, 90);
-    doc.text("Your input suggests significant alignment gaps between your current GTM", 20, 100);
-    doc.text("strategy and rep incentives. This report outlines your prioritized risks.", 20, 110);
-    
-    doc.save(`GTM-Comp-Report-${leadInfo.name}.pdf`);
+    const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    const PW = 210, M = 20, CW = 170;
+    const toRad = (d: number) => d * Math.PI / 180;
+
+    // Dimension scores (calculated from actual answers)
+    const calcDim = (ids: string[]) => {
+      const valid = ids.filter(id => answers[id]);
+      if (!valid.length) return 50;
+      return Math.max(0, 100 - Math.round(valid.reduce((s, id) => s + answers[id].score, 0) / (valid.length * 5) * 100));
+    };
+    const dims = [
+      { label: "Alignment",   sub: "GTM & comp plan alignment",          score: calcDim(["q4","q7"]) },
+      { label: "Motivation",  sub: "OTE, accelerators & attainment",     score: calcDim(["q5","q6","q11"]) },
+      { label: "Operational", sub: "Commission ops & documentation",      score: calcDim(["q8","q9","q10"]) },
+      { label: "Economic",    sub: "Stage, plan health & retention",      score: calcDim(["q1","q2","q3","q12"]) },
+    ];
+
+    // Prioritised recommendations based on high-risk answers
+    const recs = [
+      { q:"q4", area:"Compensation Clarity",   finding:"Reps cannot clearly explain how they are paid or how quotas are set.",                        action:"Build a one-page comp summary per role and run a structured walkthrough each plan year. Unclear comp directly drives rep disengagement." },
+      { q:"q5", area:"OTE Framework",          finding:"OTE targets are inconsistent or have not been benchmarked against market rates.",              action:"Conduct a market benchmarking exercise and standardize OTE bands by role. Misaligned OTE is the leading driver of quiet quitting in sales." },
+      { q:"q6", area:"Accelerator Design",     finding:"Accelerators are not driving above-quota performance.",                                        action:"Audit accelerator thresholds — they are likely set too high or the incremental payout is not compelling enough to change rep behavior." },
+      { q:"q7", area:"GTM Alignment",          finding:"Your comp plan has not kept pace with recent go-to-market strategy changes.",                  action:"Schedule an immediate plan audit. Every month of misalignment means paying reps to execute the wrong priorities." },
+      { q:"q8", area:"Commission Operations",  finding:"Commission calculations are manual or inconsistently managed.",                                action:"Evaluate ICM platforms (CaptivateIQ, Spiff, Xactly). Manual calculation creates errors, disputes, and erodes rep trust over time." },
+      { q:"q9", area:"Dispute Resolution",     finding:"Commission disputes are frequent and slow to resolve.",                                        action:"Establish a formal dispute window and resolution SLA. Recurring disputes signal deeper structural problems in the plan design." },
+      { q:"q10",area:"Documentation",          finding:"Comp plan documentation is incomplete or reps have not signed off.",                          action:"Issue signed comp plan letters annually. Documentation removes rep ambiguity and provides legal protection for the company." },
+      { q:"q11",area:"Quota Calibration",      finding:"Attainment distribution indicates a quota design problem.",                                    action:"Run a rep-level attainment analysis. Below 50% attainment almost always reflects a quota-setting failure, not a talent problem." },
+      { q:"q12",area:"Retention Risk",         finding:"Compensation has been cited as a contributing factor in rep departures.",                     action:"Benchmark OTE immediately against top-quartile competitors. Losing multiple strong reps to comp is a structural, not a personnel, problem." },
+    ].filter(r => (answers[r.q]?.score || 0) >= 4).slice(0, 5);
+
+    if (recs.length === 0) recs.push({ q:"", area:"Ongoing Optimization", finding:"Your comp infrastructure is performing well relative to growth-stage peers.", action:"Schedule a semi-annual comp review to maintain alignment as your GTM strategy evolves. Strong plans still require proactive maintenance." });
+
+    const riskLabel = score >= 70 ? "LOW RISK" : score >= 40 ? "MODERATE RISK" : "HIGH RISK";
+    const rC = score >= 70 ? [16,185,129] : score >= 40 ? [245,158,11] : [239,68,68];
+    const dimC = (s: number): [number,number,number] => s >= 70 ? [16,185,129] : s >= 40 ? [245,158,11] : [239,68,68];
+
+    // ── Logo helper ────────────────────────────────────────────────
+    const drawLogo = (yPos: number, large: boolean) => {
+      const gSz = large ? 22 : 14, pSz = large ? 13 : 9, gap = large ? 8 : 6, lh = large ? 9 : 6;
+      doc.setFont("times","bold"); doc.setFontSize(gSz); doc.setTextColor(30,27,75);
+      const gW = doc.getTextWidth("GILL");
+      doc.setFont("helvetica","normal"); doc.setFontSize(pSz);
+      const pW = doc.getTextWidth("GTM PARTNERS");
+      const lx = (PW - gW - gap - pW) / 2;
+      doc.setFont("times","bold"); doc.setFontSize(gSz);
+      doc.text("GILL", lx, yPos);
+      doc.setDrawColor(30,27,75); doc.setLineWidth(0.5);
+      doc.line(lx + gW + gap/2, yPos - lh + 2, lx + gW + gap/2, yPos + 1.5);
+      doc.setFont("helvetica","normal"); doc.setFontSize(pSz); doc.setTextColor(30,27,75);
+      doc.text("GTM PARTNERS", lx + gW + gap, yPos);
+    };
+
+    // ════════════════════════════════════════════════════════════════
+    // PAGE 1 — Score & Dimensions
+    // ════════════════════════════════════════════════════════════════
+    drawLogo(22, true);
+    doc.setDrawColor(99,102,241); doc.setLineWidth(0.5); doc.line(M, 29, PW-M, 29);
+
+    doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(107,114,128);
+    doc.text("SALES COMPENSATION HEALTH REPORT", PW/2, 38, { align:"center" });
+
+    doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
+    doc.text(`Prepared for: ${leadInfo.name}`, M, 46);
+    doc.text(`Date: ${date}`, PW-M, 46, { align:"right" });
+
+    doc.setDrawColor(229,231,235); doc.setLineWidth(0.3); doc.line(M, 51, PW-M, 51);
+
+    // ── Score gauge ────────────────────────────────────────────────
+    const gx = PW/2, gy = 86, gr = 23;
+    const arcStart = 135, arcSweep = 270, arcSteps = 80;
+
+    doc.setDrawColor(220,220,220); doc.setLineWidth(5.5);
+    for (let i = 0; i < arcSteps; i++) {
+      const a1 = toRad(arcStart + arcSweep * i / arcSteps);
+      const a2 = toRad(arcStart + arcSweep * (i+1) / arcSteps);
+      doc.line(gx + gr*Math.cos(a1), gy + gr*Math.sin(a1), gx + gr*Math.cos(a2), gy + gr*Math.sin(a2));
+    }
+    const filledSweep = arcSweep * score / 100;
+    const filledSteps = Math.max(1, Math.round(arcSteps * score / 100));
+    doc.setDrawColor(rC[0], rC[1], rC[2]); doc.setLineWidth(5.5);
+    for (let i = 0; i < filledSteps; i++) {
+      const a1 = toRad(arcStart + filledSweep * i / filledSteps);
+      const a2 = toRad(arcStart + filledSweep * (i+1) / filledSteps);
+      doc.line(gx + gr*Math.cos(a1), gy + gr*Math.sin(a1), gx + gr*Math.cos(a2), gy + gr*Math.sin(a2));
+    }
+    doc.setFont("helvetica","bold"); doc.setFontSize(30); doc.setTextColor(30,27,75);
+    doc.text(`${score}`, gx, gy + 5, { align:"center" });
+    doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(107,114,128);
+    doc.text("HEALTH SCORE", gx, gy + 11.5, { align:"center" });
+
+    const bW = 48, bH = 7.5, bx = gx - bW/2, by = gy + 17;
+    doc.setFillColor(rC[0], rC[1], rC[2]);
+    doc.roundedRect(bx, by, bW, bH, 2, 2, "F");
+    doc.setFont("helvetica","bold"); doc.setFontSize(7); doc.setTextColor(255,255,255);
+    doc.text(riskLabel, gx, by + 5, { align:"center" });
+
+    // ── Dimension bars ─────────────────────────────────────────────
+    let y = gy + 34;
+    doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(30,27,75);
+    doc.text("DIMENSION BREAKDOWN", M, y);
+    y += 7;
+
+    dims.forEach(({ label, sub, score: ds }) => {
+      const dc = dimC(ds);
+      doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(30,27,75);
+      doc.text(label, M, y);
+      doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(107,114,128);
+      doc.text(sub, M, y + 4.5);
+      const bx2 = M+54, bw2 = 93, bh2 = 3.5;
+      doc.setFillColor(229,231,235); doc.roundedRect(bx2, y-2, bw2, bh2, 1, 1, "F");
+      doc.setFillColor(dc[0], dc[1], dc[2]); doc.roundedRect(bx2, y-2, Math.max(2, bw2*ds/100), bh2, 1, 1, "F");
+      doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(30,27,75);
+      doc.text(`${ds}%`, PW-M, y, { align:"right" });
+      y += 13;
+    });
+
+    y += 2;
+    doc.setDrawColor(229,231,235); doc.setLineWidth(0.3); doc.line(M, y, PW-M, y);
+    y += 7;
+    doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(107,114,128);
+    const ctxLines = doc.splitTextToSize("A score below 70 indicates material risk across one or more compensation dimensions. The recommendations on the following page identify your highest-priority action items based on your specific responses.", CW);
+    doc.text(ctxLines, M, y);
+
+    // ════════════════════════════════════════════════════════════════
+    // PAGE 2 — Recommendations + CTA
+    // ════════════════════════════════════════════════════════════════
+    doc.addPage();
+    drawLogo(22, false);
+    doc.setDrawColor(99,102,241); doc.setLineWidth(0.5); doc.line(M, 29, PW-M, 29);
+
+    doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(107,114,128);
+    doc.text("PRIORITY RECOMMENDATIONS", PW/2, 38, { align:"center" });
+
+    y = 45;
+    doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(107,114,128);
+    const intro = `Based on your responses, ${leadInfo.name}, the following areas represent your highest-priority action items. These findings reflect patterns identified across hundreds of growth-stage sales organizations.`;
+    const introLines = doc.splitTextToSize(intro, CW);
+    doc.text(introLines, M, y);
+    y += introLines.length * 5 + 6;
+
+    recs.forEach(({ area, finding, action }, i) => {
+      if (y > 248) { doc.addPage(); y = 25; }
+
+      doc.setFillColor(99,102,241);
+      doc.circle(M + 3.5, y + 1.5, 3.5, "F");
+      doc.setFont("helvetica","bold"); doc.setFontSize(7); doc.setTextColor(255,255,255);
+      doc.text(`${i + 1}`, M + 3.5, y + 3, { align:"center" });
+
+      doc.setFont("helvetica","bold"); doc.setFontSize(9.5); doc.setTextColor(30,27,75);
+      doc.text(area, M + 10, y + 3);
+      y += 9;
+
+      doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.setTextColor(107,114,128);
+      const fl = doc.splitTextToSize(`Finding: ${finding}`, CW - 10);
+      doc.text(fl, M + 8, y);
+      y += fl.length * 4.5 + 2;
+
+      doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(30,27,75);
+      const al = doc.splitTextToSize(`→ ${action}`, CW - 10);
+      doc.text(al, M + 8, y);
+      y += al.length * 4.5 + 7;
+
+      if (i < recs.length - 1) {
+        doc.setDrawColor(229,231,235); doc.setLineWidth(0.2); doc.line(M, y - 2, PW-M, y - 2);
+      }
+    });
+
+    // ── Footer CTA ─────────────────────────────────────────────────
+    const ftY = 264;
+    doc.setDrawColor(99,102,241); doc.setLineWidth(0.4); doc.line(M, ftY, PW-M, ftY);
+    doc.setFillColor(224,231,255); doc.roundedRect(M, ftY+4, CW, 20, 3, 3, "F");
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(30,27,75);
+    doc.text("Ready to close these gaps in 6–8 weeks?", PW/2, ftY+11, { align:"center" });
+    doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(99,102,241);
+    doc.text("contact@gillgtmpartners.com  ·  gillgtmpartners.com", PW/2, ftY+17.5, { align:"center" });
+    doc.setFont("helvetica","normal"); doc.setFontSize(6.5); doc.setTextColor(156,163,175);
+    doc.text("© Gill GTM Partners  ·  Confidential — Prepared exclusively for the recipient named above.", PW/2, ftY+25, { align:"center" });
+
+    doc.save(`GTM-Comp-Report-${leadInfo.name.replace(/\s+/g, "-")}.pdf`);
   };
 
   const calculateHealthPercentage = () => {
