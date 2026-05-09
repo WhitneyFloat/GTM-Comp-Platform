@@ -378,7 +378,7 @@ export default function PublicDiagnostic() {
       y += fl.length * 4.5 + 2;
 
       doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(30,27,75);
-      const al = doc.splitTextToSize(`→ ${action}`, CW - 10);
+      const al = doc.splitTextToSize(`Recommended Action: ${action}`, CW - 10);
       doc.text(al, M + 8, y);
       y += al.length * 4.5 + 7;
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, CheckCircle2, Activity } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle2, Activity, ShieldCheck, Sparkles, Lock } from "lucide-react";
 import { LiquidGlassCard } from "@/components/ui/LiquidGlassCard";
 import { cn } from "@/lib/utils";
 import jsPDF from "jspdf";
@@ -160,6 +160,8 @@ const QUESTIONS: Question[] = [
 export default function DiagnosticEngine() {
   const [step, setStep] = useState(-1);
   const [answers, setAnswers] = useState<Record<string, { score: number; idx: number }>>({});
+  const [leadInfo, setLeadInfo] = useState({ name: "", email: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleNext = () => {
     if (step < QUESTIONS.length) {
@@ -180,10 +182,28 @@ export default function DiagnosticEngine() {
     }, 400);
   };
 
+  const handleLeadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: leadInfo.name, email: leadInfo.email, stage: "1" }),
+      });
+    } catch (err) {
+      console.error("Lead submission failed", err);
+    } finally {
+      setIsSubmitting(false);
+      setStep(prev => prev + 1);
+    }
+  };
+
   const currentQuestion = QUESTIONS[step];
   const sectionInfo = currentQuestion ? SECTIONS.find(s => s.id === currentQuestion.section) : null;
   const isIntro = step === -1;
-  const isResult = step === QUESTIONS.length;
+  const isLeadCapture = step === QUESTIONS.length;
+  const isResult = step === QUESTIONS.length + 1;
 
   const totalScore = Object.values(answers).reduce((a, b) => a + b.score, 0);
   const maxScore = QUESTIONS.length * 5;
@@ -251,7 +271,7 @@ export default function DiagnosticEngine() {
     doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
     doc.setTextColor(107,114,128);
     doc.text(`Date: ${date}`, PW-M, 46, { align:"right" });
-    doc.text("Internal Assessment", M, 46);
+    doc.text(`Prepared for: ${leadInfo.name || "Assessment Recipient"}`, M, 46);
 
     doc.setDrawColor(229,231,235); doc.setLineWidth(0.3); doc.line(M, 51, PW-M, 51);
 
@@ -321,7 +341,7 @@ export default function DiagnosticEngine() {
 
     y = 45;
     doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(107,114,128);
-    const intro = "Based on the assessment responses, the following areas represent the highest-priority action items. These findings reflect patterns identified across hundreds of growth-stage sales organizations.";
+    const intro = `Based on your responses, ${leadInfo.name || "the assessment respondent"}, the following areas represent your highest-priority action items. These findings reflect patterns identified across hundreds of growth-stage sales organizations.`;
     const introLines = doc.splitTextToSize(intro, CW);
     doc.text(introLines, M, y);
     y += introLines.length * 5 + 6;
@@ -344,7 +364,7 @@ export default function DiagnosticEngine() {
       y += fl.length * 4.5 + 2;
 
       doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(30,27,75);
-      const al = doc.splitTextToSize(`→ ${action}`, CW - 10);
+      const al = doc.splitTextToSize(`Recommended Action: ${action}`, CW - 10);
       doc.text(al, M + 8, y);
       y += al.length * 4.5 + 7;
 
@@ -487,6 +507,63 @@ export default function DiagnosticEngine() {
                     Next Question <ArrowRight size={16} /> 
                   </button>
                 </div>
+              </motion.div>
+            )}
+
+            {isLeadCapture && (
+              <motion.div
+                key="capture"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+                className="max-w-lg mx-auto"
+              >
+                <div className="text-center mb-8">
+                  <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/10">
+                    <ShieldCheck className="text-emerald-500" size={40} />
+                  </div>
+                  <h2 className="text-3xl font-bold text-slate-800 tracking-tight mb-3">Assessment complete.</h2>
+                  <p className="text-slate-500 leading-relaxed">
+                    Enter your details to unlock your <span className="text-brand-indigo font-bold">Comp Health Score</span> and personalized PDF report.
+                  </p>
+                </div>
+
+                <LiquidGlassCard className="p-10" blurIntensity="xl" shadowIntensity="lg">
+                  <form onSubmit={handleLeadSubmit} className="space-y-5">
+                    <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Full Name</label>
+                      <input
+                        required
+                        type="text"
+                        placeholder="e.g. David Chen"
+                        className="w-full bg-white/50 border border-white/60 rounded-xl py-4 px-4 outline-none focus:ring-2 focus:ring-brand-indigo/30 transition-all font-bold text-slate-800"
+                        value={leadInfo.name}
+                        onChange={(e) => setLeadInfo({ ...leadInfo, name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Work Email</label>
+                      <input
+                        required
+                        type="email"
+                        placeholder="david@company.io"
+                        className="w-full bg-white/50 border border-white/60 rounded-xl py-4 px-4 outline-none focus:ring-2 focus:ring-brand-indigo/30 transition-all font-bold text-slate-800"
+                        value={leadInfo.email}
+                        onChange={(e) => setLeadInfo({ ...leadInfo, email: e.target.value })}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full py-5 mt-2 bg-indigo-600 text-white rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-indigo-700 shadow-2xl shadow-indigo-500/40 active:scale-[0.98] transition-all text-sm disabled:opacity-70"
+                    >
+                      {isSubmitting ? "Saving..." : <><span>Unlock My Results</span> <Sparkles size={20} /></>}
+                    </button>
+                    <p className="text-[10px] text-slate-400 text-center flex items-center justify-center gap-2 font-bold uppercase tracking-widest">
+                      <Lock size={12} /> Confidential — Gill GTM Partners
+                    </p>
+                  </form>
+                </LiquidGlassCard>
               </motion.div>
             )}
 
