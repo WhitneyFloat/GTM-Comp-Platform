@@ -30,8 +30,8 @@ export default function NavigationWrapper({ children }: { children: React.ReactN
       {!isPublicRoute && <Sidebar />}
       
       <main className={cn(
-        "flex-1 overflow-auto h-screen relative z-10 w-full",
-        !isPublicRoute ? "p-0 lg:p-4 pb-32 lg:pb-4" : "p-0"
+        "flex-1 relative z-10 w-full overflow-y-auto",
+        !isPublicRoute ? "p-0 lg:p-4 pb-36 lg:pb-4" : "p-0"
       )}>
         {children}
       </main>
