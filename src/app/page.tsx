@@ -54,7 +54,7 @@ export default function DiagnosticEngine() {
 
   const handleDownloadPDF = async () => {
     const { generateReport } = await import("@/lib/generateReport");
-    generateReport({ name: leadInfo.name, answers, questions: QUESTIONS });
+    await generateReport({ name: leadInfo.name, answers, questions: QUESTIONS });
   };
 
   const currentQuestion = QUESTIONS[step];

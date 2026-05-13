@@ -17,6 +17,7 @@ export default function PublicDiagnostic() {
   const [leadInfo, setLeadInfo] = useState({ name: "", email: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const totalSteps = QUESTIONS.length;
   const isIntro = currentStep === -1;
@@ -53,8 +54,16 @@ export default function PublicDiagnostic() {
   };
 
   const handleDownloadPDF = async () => {
-    const { generateReport } = await import("@/lib/generateReport");
-    generateReport({ name: leadInfo.name, answers, questions: QUESTIONS });
+    setIsGeneratingPDF(true);
+    try {
+      const { generateReport } = await import("@/lib/generateReport");
+      await generateReport({ name: leadInfo.name, answers, questions: QUESTIONS });
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      alert("PDF generation failed — please try again or contact support.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const calculateHealthPercentage = () => {
@@ -208,9 +217,9 @@ export default function PublicDiagnostic() {
                   })}
                 </div>
 
-                <button onClick={handleDownloadPDF}
-                  className="w-full bg-slate-800 text-white py-5 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-900 transition-all shadow-2xl shadow-slate-300 text-sm">
-                  <Download size={20} /> Download Full Strategy Report
+                <button onClick={handleDownloadPDF} disabled={isGeneratingPDF}
+                  className="w-full bg-slate-800 text-white py-5 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-900 transition-all shadow-2xl shadow-slate-300 text-sm disabled:opacity-60 disabled:cursor-wait">
+                  <Download size={20} /> {isGeneratingPDF ? "Generating PDF…" : "Download Full Strategy Report"}
                 </button>
                 <div className="mt-8 pt-8 border-t border-slate-100 flex flex-col items-center gap-4">
                   <p className="text-xs font-bold text-slate-500">Want to fix these gaps in 6 weeks?</p>
