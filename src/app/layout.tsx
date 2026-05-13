@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${spaceGrotesk.variable} h-full antialiased`}>
-      <body className="min-h-full flex text-text-main font-sans overflow-hidden relative">
+      <body className="min-h-screen flex text-text-main font-sans overflow-x-hidden relative">
         {/* New Sunset Radial Gradient Background */}
         <div 
           className="absolute inset-0 z-0"
