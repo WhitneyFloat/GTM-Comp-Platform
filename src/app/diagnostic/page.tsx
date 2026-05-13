@@ -9,7 +9,7 @@ import {
 import { LiquidGlassCard } from "@/components/ui/LiquidGlassCard";
 import { cn } from "@/lib/utils";
 import { QUESTIONS, SECTIONS, DIMENSIONS } from "@/lib/diagnosticData";
-import { generateReport, type Answer } from "@/lib/generateReport";
+import type { Answer } from "@/lib/generateReport";
 
 export default function PublicDiagnostic() {
   const [currentStep, setCurrentStep] = useState(-1);
@@ -52,7 +52,8 @@ export default function PublicDiagnostic() {
     }
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
+    const { generateReport } = await import("@/lib/generateReport");
     generateReport({ name: leadInfo.name, answers, questions: QUESTIONS });
   };
 
