@@ -1,4 +1,3 @@
-import jsPDF from "jspdf";
 import { DIMENSIONS, RECOMMENDATIONS, type Question } from "./diagnosticData";
 
 // ── Color palette ──────────────────────────────────────────────────────────
@@ -33,7 +32,8 @@ interface ReportInput {
   filename?: string;
 }
 
-export function generateReport({ name, answers, questions, filename }: ReportInput) {
+export async function generateReport({ name, answers, questions, filename }: ReportInput) {
+  const { default: jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const PW = 210, PH = 297, M = 20, CW = 170;
   const toRad = (d: number) => (d * Math.PI) / 180;
