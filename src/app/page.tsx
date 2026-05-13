@@ -75,7 +75,7 @@ export default function DiagnosticEngine() {
   const dimColor = (s: number) => (s >= 70 ? "text-emerald-600" : s >= 40 ? "text-amber-500" : "text-red-500");
 
   return (
-    <div className="w-full min-h-full flex flex-col pt-8 px-4 md:pt-12 md:px-8 pb-40 lg:pb-16">
+    <div className="w-full flex flex-col pt-8 px-4 md:pt-12 md:px-8 pb-8">
       <div className="max-w-4xl mx-auto w-full">
         {/* Header */}
         <header className="mb-12 border-b border-brand-blue/20 pb-6 flex justify-between items-end">
