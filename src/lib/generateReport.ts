@@ -33,8 +33,11 @@ interface ReportInput {
 }
 
 export async function generateReport({ name, answers, questions, filename }: ReportInput) {
-  const { default: jsPDF } = await import("jspdf");
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  // jsPDF 2.x exports a named `jsPDF` AND a default — try named first
+  const jsPDFModule = await import("jspdf");
+  const JsPDF = (jsPDFModule as any).jsPDF ?? jsPDFModule.default;
+  if (!JsPDF) throw new Error("jsPDF failed to load");
+  const doc = new JsPDF({ unit: "mm", format: "a4" });
   const PW = 210, PH = 297, M = 20, CW = 170;
   const toRad = (d: number) => (d * Math.PI) / 180;
   const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });

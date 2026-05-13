@@ -14,6 +14,7 @@ export default function DiagnosticEngine() {
   const [leadInfo, setLeadInfo] = useState({ name: "", email: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const handleNext = () => {
     if (step < QUESTIONS.length) setStep((p) => p + 1);
@@ -53,8 +54,16 @@ export default function DiagnosticEngine() {
   };
 
   const handleDownloadPDF = async () => {
-    const { generateReport } = await import("@/lib/generateReport");
-    await generateReport({ name: leadInfo.name, answers, questions: QUESTIONS });
+    setIsGeneratingPDF(true);
+    try {
+      const { generateReport } = await import("@/lib/generateReport");
+      await generateReport({ name: leadInfo.name, answers, questions: QUESTIONS });
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      alert(`PDF generation failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const currentQuestion = QUESTIONS[step];
@@ -216,9 +225,9 @@ export default function DiagnosticEngine() {
                           );
                         })}
                       </div>
-                      <button onClick={handleDownloadPDF}
-                        className="bg-indigo-900 text-white font-semibold py-3 px-8 rounded-xl flex items-center gap-2 hover:bg-indigo-800 transition-colors shadow-md">
-                        <Download size={18} /> Download Full Report PDF
+                      <button onClick={handleDownloadPDF} disabled={isGeneratingPDF}
+                        className="bg-indigo-900 text-white font-semibold py-3 px-8 rounded-xl flex items-center gap-2 hover:bg-indigo-800 transition-colors shadow-md disabled:opacity-60 disabled:cursor-wait">
+                        <Download size={18} /> {isGeneratingPDF ? "Generating PDF…" : "Download Full Report PDF"}
                       </button>
                       <button onClick={() => setStep(-1)} className="mt-4 text-brand-indigo text-sm font-semibold hover:underline block">
                         Retake Assessment
